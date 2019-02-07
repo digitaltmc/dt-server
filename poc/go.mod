@@ -4,6 +4,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/graph-gophers/graphql-go v0.0.0-20190205233743-95e4a602e3fa
+	github.com/mnmtanish/go-graphiql v0.0.0-20160921055525-cef5a61bd62b
 	github.com/mongodb/mongo-go-driver v0.3.0
 	github.com/rs/cors v1.6.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect

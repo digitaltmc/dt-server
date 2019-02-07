@@ -14,12 +14,17 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
   "github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/rs/cors"
+
+  "github.com/mnmtanish/go-graphiql"
 )
 
 //////// MAIN ////////
 func main() {
 	// Create a handler for /graphql which passes cors for remote requests
 	http.Handle("/graphql", cors.Default().Handler(&relay.Handler{Schema: graphqlSchema}))
+
+  // Serve graphiql static assets
+  http.HandleFunc("/", graphiql.ServeGraphiQL)
 
 	// ListenAndServe starts an HTTP server with a given address and handler.
 	log.Fatal(http.ListenAndServe(":8080", nil))
