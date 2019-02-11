@@ -1,6 +1,7 @@
 module github.com/silencej/poc
 
 require (
+	github.com/friendsofgo/graphiql v0.2.1
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/graph-gophers/graphql-go v0.0.0-20190205233743-95e4a602e3fa
