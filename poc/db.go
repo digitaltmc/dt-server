@@ -45,6 +45,6 @@ func GetMongo(col string) (context.Context, *mongo.Collection) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := client.Database("minimalGraphql").Collection(col)
+	collection := client.Database("digitaltmc").Collection(col)
 	return ctx, collection
 }
