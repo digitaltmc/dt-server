@@ -5,6 +5,7 @@ import (
 	"github.com/graph-gophers/graphql-go"
 
  	"github.com/mongodb/mongo-go-driver/bson"
+  "github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 // 	"log"
@@ -41,7 +42,7 @@ type Role struct {
 }
 
 type Person struct {
-  ID graphql.ID `json:"id"`
+  Id primitive.ObjectID `json:"id" bson:"_id,omitempty"`
   Name string
   Password string
   Mobile string
@@ -148,7 +149,8 @@ func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
     return &fail
   }
   fmt.Println(p)
-  return &(p.ID)
+  var succ = graphql.ID(p.Id.Hex())
+  return &succ
 }
 
 /*
