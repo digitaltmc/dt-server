@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+  "os"
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
@@ -15,13 +16,18 @@ func init() {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "58080" //localhost
+	}
+
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(page)
 	}))
 
 	http.Handle("/graphql", &relay.Handler{Schema: schema})
 
-	log.Fatal(http.ListenAndServe(":58080", nil))
+	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
 var page = []byte(`
