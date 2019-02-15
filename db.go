@@ -2,16 +2,26 @@ package main
 
 import (
 	"context"
+  "fmt"
 	"log"
 	"time"
+	"os"
+	"github.com/joho/godotenv"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
   "github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
+var host string
 
-const host string = "localhost"
+func init() {
+	e := godotenv.Load()
+	if e != nil {
+		fmt.Print(e)
+	}
+  host = os.Getenv("MONGODB_URI")
+}
 
 // Cleanup will remove all mock data from the database.
 func Cleanup(col string) {
@@ -41,7 +51,7 @@ func GetMongo(col string) (context.Context, *mongo.Collection) {
 
 	ctx := context.Background()
 
-	client, err := mongo.Connect(ctx, "mongodb://"+host+":27017", &options)
+	client, err := mongo.Connect(ctx, host, &options)
 	if err != nil {
 		log.Fatal(err)
 	}

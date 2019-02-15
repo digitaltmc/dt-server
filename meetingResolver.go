@@ -158,5 +158,8 @@ mutation {
   register(person: {name: "owen", password: "pwd"})
 }
 
+{
+  login(user: "owen", password: "pwd")
+}
 
 */
