@@ -153,13 +153,3 @@ func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
   return &succ
 }
 
-/*
-mutation {
-  register(person: {name: "owen", password: "pwd"})
-}
-
-{
-  login(user: "owen", password: "pwd")
-}
-
-*/

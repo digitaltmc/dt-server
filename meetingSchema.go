@@ -55,7 +55,7 @@ var Schema = `
     }
 
     type Role {
-      name: RolesEnum
+      name: MeetingRolesEnum
       member: Person
     }
 
@@ -65,6 +65,7 @@ var Schema = `
       mobile: String
       email: String
       password: String
+      officerRole: OfficersEnum
       isMember: Boolean
       joinedSince: String
       membershipUntil: String
@@ -81,7 +82,7 @@ var Schema = `
 #      achievements: [ MeetingItem ]
     }
 
-    enum RolesEnum {
+    enum MeetingRolesEnum {
       TMD
       TTM
       TTIE
@@ -92,6 +93,10 @@ var Schema = `
       ShareMaster
       Speaker
       IE
+      President
+      SAA
+      VPM
+      VPE
     }
 
     enum OfficersEnum {
