@@ -25,6 +25,7 @@ var Schema = `
     # The Query type represents all of the entry points.
     type Query {
       hello: String!
+      wxLogin(code: String!): String!
 
       login(user: String!, password: String!): ID
 #      meetings: [Meeting]

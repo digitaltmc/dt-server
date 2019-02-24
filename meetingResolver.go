@@ -128,6 +128,31 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *string {
     },
   )
   return &succ
+func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
+	wxInfo, err := getwxLoginResult(arg.Code)
+	if wxInfo.Openid != "" {
+		ctx, collection := GetMongo("person")
+		c := collection.FindOne(
+			ctx,
+			bson.D{
+				{"openid", wxInfo.Openid},
+			},
+		)
+		var p Person
+		var err = c.Decode(&p)
+
+		if err != nil {
+			fmt.Println(err)
+			openid := wxInfo.Openid
+			return openid
+		}
+		fmt.Println(p)
+		id := p.Id.Hex()
+		return id
+	} else {
+		e := err.Error()
+		return e
+	}
 }
 
 func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
