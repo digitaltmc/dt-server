@@ -8,13 +8,6 @@ package main
 // 	"github.com/graph-gophers/graphql-go/relay"
 // )
 
-// 	"github.com/rs/cors"
-
-// 	"github.com/mongodb/mongo-go-driver/bson"
-
-//  "github.com/friendsofgo/graphiql"
-//  "github.com/mnmtanish/go-graphiql"
-
 
 // Schema describes the data that we ask for
 var Schema = `
@@ -34,7 +27,7 @@ var Schema = `
 
     type Mutation {
       register(person: PersonInput): String
-#      book(date: String!, role: RolesEnum!, title: String): Meeting
+      book(date: String!, role: RolesEnum!, title: String): Meeting
     }
 
     type Post {
@@ -94,10 +87,10 @@ var Schema = `
       ShareMaster
       Speaker
       IE
-      President
-      SAA
-      VPM
-      VPE
+      RolePresident
+      RoleSAA
+      RoleVPM
+      RoleVPE
     }
 
     enum OfficersEnum {

@@ -77,6 +77,10 @@ const (
   ShareMaster RolesEnum = 7
   Speaker RolesEnum = 8
   IE RolesEnum = 9
+  RolePresident RolesEnum = 10
+  RoleSAA RolesEnum = 11
+  RoleVPM RolesEnum = 12
+  RoleVPE RolesEnum = 13
 )
 
 type OfficersEnum int
@@ -128,6 +132,8 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *string {
     },
   )
   return &succ
+}
+
 func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 	wxInfo, err := getwxLoginResult(arg.Code)
 	if wxInfo.Openid != "" {
@@ -178,3 +184,33 @@ func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
   return &succ
 }
 
+// User can book a role if the role is not yet taken.
+// User may book many roles in a meeting. - As long as they can handle.
+func (_ *Resolver) Book(arg *struct {
+  Date string
+  Role RolesEnum
+  Title string
+}) Meeting {
+  ctx, collection := GetMongo("meeting")
+  cnt, err := collection.Count(
+    ctx,
+    bson.D{
+      {"date", arg.Date},
+    },
+  )
+  if err != nil {
+    fmt.Println(err)
+  }
+  if cnt != 0 {
+    fmt.Printf("User already exists: %v", arg.Person.Name)
+    return &fail
+  }
+
+  collection.InsertOne(
+    ctx,
+    bson.D{
+      {"name", arg.Person.Name},
+      {"password", arg.Person.Password},
+    },
+  )
+}
