@@ -128,6 +128,8 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *string {
     },
   )
   return &succ
+}
+
 func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 	wxInfo, err := getwxLoginResult(arg.Code)
 	if wxInfo.Openid != "" {
