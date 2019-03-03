@@ -3,7 +3,7 @@ package main
 // import (
 // 	"log"
 // 	"net/http"
-// 
+//
 // 	"github.com/graph-gophers/graphql-go"
 // 	"github.com/graph-gophers/graphql-go/relay"
 // )
@@ -14,7 +14,6 @@ package main
 
 //  "github.com/friendsofgo/graphiql"
 //  "github.com/mnmtanish/go-graphiql"
-
 
 // Schema describes the data that we ask for
 var Schema = `
@@ -75,8 +74,9 @@ var Schema = `
     input PersonInput {
       name: String!
       password: String!
-#      mobile: String
-#      email: String
+      email: String!
+      mobile: String!
+
 #      isMember: Boolean!
 #      joinedSince: String
 #      membershipUntil: String
@@ -110,4 +110,3 @@ var Schema = `
       SAA
     }
     `
-
