@@ -26,7 +26,7 @@ type Resolver struct{}
 
 type Meeting struct {
   id graphql.ID
-  agenda []MeetingItem
+  agenda []*MeetingItem
   date string
 }
 
@@ -37,7 +37,7 @@ type MeetingItem struct {
 }
 
 type Role struct {
-  name RolesEnum
+  name MeetingRolesEnum
   member Person
 }
 
@@ -65,22 +65,22 @@ type PersonInput struct {
 //  Achievements []MeetingItem
 
 
-type RolesEnum int
+type MeetingRolesEnum string
 const (
-  TMD RolesEnum = 0
-  TTM RolesEnum = 1
-  TTIE RolesEnum = 2
-  GE RolesEnum = 3
-  AhCounter RolesEnum = 4
-  Grammarian RolesEnum = 5
-  Timer RolesEnum = 6
-  ShareMaster RolesEnum = 7
-  Speaker RolesEnum = 8
-  IE RolesEnum = 9
-  RolePresident RolesEnum = 10
-  RoleSAA RolesEnum = 11
-  RoleVPM RolesEnum = 12
-  RoleVPE RolesEnum = 13
+  TMD MeetingRolesEnum = "TMD"
+  TTM MeetingRolesEnum = "TTM"
+  TTIE MeetingRolesEnum = "TTIE"
+  GE MeetingRolesEnum = "GE"
+  AhCounter MeetingRolesEnum = "AhCounter"
+  Grammarian MeetingRolesEnum = "Grammarian"
+  Timer MeetingRolesEnum = "Timer"
+  ShareMaster MeetingRolesEnum = "ShareMaster"
+  Speaker MeetingRolesEnum = "Speaker"
+  IE MeetingRolesEnum = "IE"
+  RolePresident MeetingRolesEnum = "RolePresident"
+  RoleSAA MeetingRolesEnum = "RoleSAA"
+  RoleVPM MeetingRolesEnum = "RoleVPM"
+  RoleVPE MeetingRolesEnum = "RoleVPE"
 )
 
 type OfficersEnum int
@@ -188,29 +188,59 @@ func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
 // User may book many roles in a meeting. - As long as they can handle.
 func (_ *Resolver) Book(arg *struct {
   Date string
-  Role RolesEnum
-  Title string
-}) Meeting {
+  Role MeetingRolesEnum
+  Title *string
+}) *MeetingResolver {
   ctx, collection := GetMongo("meeting")
-  cnt, err := collection.Count(
+
+  res := collection.FindOne(
     ctx,
     bson.D{
       {"date", arg.Date},
     },
   )
-  if err != nil {
-    fmt.Println(err)
-  }
-  if cnt != 0 {
-    fmt.Printf("User already exists: %v", arg.Person.Name)
-    return &fail
-  }
-
-  collection.InsertOne(
-    ctx,
-    bson.D{
-      {"name", arg.Person.Name},
-      {"password", arg.Person.Password},
-    },
-  )
+  fmt.Println(res)
+  m := Meeting{graphql.ID(0), nil, ""}
+  mr := &MeetingResolver{&m}
+  return mr
+//  if err != nil {
+//    fmt.Println(err)
+//  }
+//  if cnt != 0 {
+//    fmt.Printf("User already exists: %v", arg.Person.Name)
+//    return &fail
+//  }
+//
+//  collection.InsertOne(
+//    ctx,
+//    bson.D{
+//      {"name", arg.Person.Name},
+//      {"password", arg.Person.Password},
+//    },
+//  )
 }
+
+type MeetingResolver struct {
+  m *Meeting
+}
+
+func (r *MeetingResolver) Id() graphql.ID {
+	return r.m.id
+}
+
+func (r *MeetingResolver) Agenda() *[]*MeetingItemResolver {
+	return &r.m.agenda
+}
+
+type MeetingItemResolver struct {
+  m *MeetingItem
+}
+
+func (r *MeetingItemResolver) Id() graphql.ID {
+	return r.m.id
+}
+
+func (r *MeetingItemResolver) Agenda() *[]*MeetingItem {
+	return &r.m.agenda
+}
+
