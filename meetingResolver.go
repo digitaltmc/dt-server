@@ -2,6 +2,7 @@ package main
 
 import (
   "fmt"
+  "regexp"
 	"github.com/graph-gophers/graphql-go"
 
  	"github.com/mongodb/mongo-go-driver/bson"
@@ -31,14 +32,14 @@ type Meeting struct {
 }
 
 type MeetingItem struct {
-  role Role
-  duration float64
-  title string
+  Role Role
+  Duration float64
+  Title string
 }
 
 type Role struct {
-  name MeetingRolesEnum
-  member Person
+  Name MeetingRolesEnum
+  Member Person
 }
 
 type Person struct {
@@ -48,9 +49,10 @@ type Person struct {
   Mobile string
   Email string
   IsMember bool
+  OfficerRole OfficersEnum
   JoinedSince string
   MembershipUntil string
-  Achievements []MeetingItem
+  Achievements []*MeetingItem
 }
 
 type PersonInput struct {
@@ -99,15 +101,9 @@ const (
 func (_ *Resolver) Hello() string { return "Hello, world!" }
 
 
-//----------
+//---------- Mutations
 
-// type PersonResolver struct {
-//   p *Person
-// }
-
-func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *string {
-  var succ = "true"
-  var fail = "false"
+func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
 
   ctx, collection := GetMongo("person")
   cnt, err := collection.Count(
@@ -120,18 +116,26 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *string {
     fmt.Println(err)
   }
   if cnt != 0 {
-    fmt.Printf("User already exists: %v", arg.Person.Name)
-    return &fail
+    fmt.Printf("User already exists: %v\n", arg.Person.Name)
+    return nil
   }
 
-  collection.InsertOne(
+  insertRes, ins_err := collection.InsertOne(
     ctx,
     bson.D{
       {"name", arg.Person.Name},
       {"password", arg.Person.Password},
     },
   )
-  return &succ
+  if ins_err != nil {
+    fmt.Printf("Insert error: %v\n", ins_err)
+    return nil
+  }
+
+  // fmt.Printf("%T", insertRes.InsertedID) // InsertedID will be of type primitive.ObjectID
+	re := regexp.MustCompile(`\"(.+?)\"`)
+  ret := graphql.ID(re.FindStringSubmatch(insertRes.InsertedID.(primitive.ObjectID).String())[1])
+  return &ret
 }
 
 func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
@@ -187,6 +191,7 @@ func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
 // User can book a role if the role is not yet taken.
 // User may book many roles in a meeting. - As long as they can handle.
 func (_ *Resolver) Book(arg *struct {
+  Person graphql.ID
   Date string
   Role MeetingRolesEnum
   Title *string
@@ -220,6 +225,8 @@ func (_ *Resolver) Book(arg *struct {
 //  )
 }
 
+//---------- MeetingResolver
+
 type MeetingResolver struct {
   m *Meeting
 }
@@ -229,18 +236,97 @@ func (r *MeetingResolver) Id() graphql.ID {
 }
 
 func (r *MeetingResolver) Agenda() *[]*MeetingItemResolver {
-	return &r.m.agenda
+  ret := make([]*MeetingItemResolver, len(r.m.agenda))
+  for i, v := range r.m.agenda {
+    ret[i] = &MeetingItemResolver{v}
+  }
+	return &ret
 }
+
+func (r *MeetingResolver) Date() *string {
+	return &r.m.date
+}
+
+
+//---------- MeetingItemResolver
 
 type MeetingItemResolver struct {
   m *MeetingItem
 }
 
-func (r *MeetingItemResolver) Id() graphql.ID {
-	return r.m.id
+func (r *MeetingItemResolver) Role() *RoleResolver {
+  rr := RoleResolver{&r.m.Role}
+	return &rr
 }
 
-func (r *MeetingItemResolver) Agenda() *[]*MeetingItem {
-	return &r.m.agenda
+func (r *MeetingItemResolver) Duration() *float64 {
+	return &r.m.Duration
+}
+
+func (r *MeetingItemResolver) Title() *string {
+	return &r.m.Title
+}
+
+//---------- RoleResolver
+
+type RoleResolver struct {
+  r *Role
+}
+
+func (r *RoleResolver) Name() *MeetingRolesEnum {
+	return &r.r.Name
+}
+
+func (r *RoleResolver) Member() *PersonResolver {
+  rr := PersonResolver{&r.r.Member}
+	return &rr
+}
+
+//---------- PersonResolver
+
+type PersonResolver struct {
+  r *Person
+}
+
+func (r *PersonResolver) Id() graphql.ID {
+  ret := graphql.ID(r.r.Id.String())
+	return ret
+}
+
+func (r *PersonResolver) Name() *string {
+	return &r.r.Name
+}
+
+func (r *PersonResolver) Password() *string {
+	return &r.r.Password
+}
+
+func (r *PersonResolver) Mobile() *string {
+	return &r.r.Mobile
+}
+
+func (r *PersonResolver) Email() *string {
+	return &r.r.Email
+}
+
+func (r *PersonResolver) OfficerRole() *OfficersEnum {
+	return &r.r.OfficerRole
+}
+
+func (r *PersonResolver) IsMember() *bool {
+	return &r.r.IsMember
+}
+
+func (r *PersonResolver) JoinedSince() *string {
+	return &r.r.JoinedSince
+}
+
+func (r *PersonResolver) MembershipUntil() *string {
+	return &r.r.MembershipUntil
+}
+
+func (r *PersonResolver) Achievements() *[]*MeetingItemResolver {
+	ret := makeMeetingItemResolver(r.r.Achievements)
+	return &ret
 }
 

@@ -26,8 +26,8 @@ var Schema = `
     }
 
     type Mutation {
-      register(person: PersonInput): String
-      book(date: String!, role: MeetingRolesEnum!, title: String): Meeting
+      register(person: PersonInput): ID
+      book(person: ID!, date: String!, role: MeetingRolesEnum!, title: String): Meeting
     }
 
     type Post {
