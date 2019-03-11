@@ -3,7 +3,7 @@ package main
 // import (
 // 	"log"
 // 	"net/http"
-// 
+//
 // 	"github.com/graph-gophers/graphql-go"
 // 	"github.com/graph-gophers/graphql-go/relay"
 // )
@@ -68,8 +68,9 @@ var Schema = `
     input PersonInput {
       name: String!
       password: String!
-#      mobile: String
-#      email: String
+      email: String!
+      mobile: String!
+
 #      isMember: Boolean!
 #      joinedSince: String
 #      membershipUntil: String
@@ -103,4 +104,3 @@ var Schema = `
       SAA
     }
     `
-

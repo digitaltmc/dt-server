@@ -3,23 +3,22 @@ package main
 import (
   "fmt"
   "regexp"
+
 	"github.com/graph-gophers/graphql-go"
 
- 	"github.com/mongodb/mongo-go-driver/bson"
-  "github.com/mongodb/mongo-go-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 // 	"log"
 // 	"net/http"
-// 
+//
 // 	"github.com/graph-gophers/graphql-go/relay"
 
 //  "github.com/friendsofgo/graphiql"
 //  "github.com/mnmtanish/go-graphiql"
 
-
 // 	"github.com/rs/cors"
-
 
 type Resolver struct{}
 
@@ -56,9 +55,12 @@ type Person struct {
 }
 
 type PersonInput struct {
-  Name string
-  Password string
+	Name     string
+	Password string
+	Email    string
+	Mobile   string
 }
+
 //  Mobile string
 //  Email string
 //  IsMember bool
@@ -66,40 +68,40 @@ type PersonInput struct {
 //  MembershipUntil string
 //  Achievements []MeetingItem
 
+type RolesEnum int
 
-type MeetingRolesEnum string
 const (
-  TMD MeetingRolesEnum = "TMD"
-  TTM MeetingRolesEnum = "TTM"
-  TTIE MeetingRolesEnum = "TTIE"
-  GE MeetingRolesEnum = "GE"
-  AhCounter MeetingRolesEnum = "AhCounter"
-  Grammarian MeetingRolesEnum = "Grammarian"
-  Timer MeetingRolesEnum = "Timer"
-  ShareMaster MeetingRolesEnum = "ShareMaster"
-  Speaker MeetingRolesEnum = "Speaker"
-  IE MeetingRolesEnum = "IE"
-  RolePresident MeetingRolesEnum = "RolePresident"
-  RoleSAA MeetingRolesEnum = "RoleSAA"
-  RoleVPM MeetingRolesEnum = "RoleVPM"
-  RoleVPE MeetingRolesEnum = "RoleVPE"
+	TMD         RolesEnum = iota
+	TTM         RolesEnum
+	TTIE        RolesEnum
+	GE          RolesEnum
+	AhCounter   RolesEnum
+	Grammarian  RolesEnum
+	Timer       RolesEnum
+	ShareMaster RolesEnum
+	Speaker     RolesEnum
+	IE          RolesEnum
+  RolePresident RolesEnum
+  RoleSAA RolesEnum
+  RoleVPM RolesEnum
+  RoleVPE RolesEnum
 )
 
 type OfficersEnum int
+
 const (
-  President OfficersEnum = 0
-  VPE OfficersEnum = 1
-  VPM OfficersEnum = 2
-  VPPR OfficersEnum = 3
-  Treasurer OfficersEnum = 4
-  Secretary OfficersEnum = 5
-  SAA OfficersEnum = 6
+	President OfficersEnum = 0
+	VPE       OfficersEnum = 1
+	VPM       OfficersEnum = 2
+	VPPR      OfficersEnum = 3
+	Treasurer OfficersEnum = 4
+	Secretary OfficersEnum = 5
+	SAA       OfficersEnum = 6
 )
 
 //---------- Query
 
 func (_ *Resolver) Hello() string { return "Hello, world!" }
-
 
 //---------- Mutations
 
@@ -125,6 +127,8 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
     bson.D{
       {"name", arg.Person.Name},
       {"password", arg.Person.Password},
+			{"email", arg.Person.Email},
+			{"mobile", arg.Person.Mobile},
     },
   )
   if ins_err != nil {
@@ -165,27 +169,27 @@ func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 	}
 }
 
-func (_ *Resolver) Login(arg *struct {User, Password string}) *graphql.ID {
-  ctx, collection := GetMongo("person")
-  c := collection.FindOne(
-    ctx,
-    bson.D{
-      {"name", arg.User},
-      {"password", arg.Password},
-    },
-  )
+func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
+	ctx, collection := GetMongo("person")
+	c := collection.FindOne(
+		ctx,
+		bson.D{
+			{"name", arg.User},
+			{"password", arg.Password},
+		},
+	)
 
-  var p Person
-  var err = c.Decode(&p)
+	var p Person
+	var err = c.Decode(&p)
 
-  var fail = graphql.ID("0")
-  if err != nil {
-    fmt.Println(err)
-    return &fail
-  }
-  fmt.Println(p)
-  var succ = graphql.ID(p.Id.Hex())
-  return &succ
+	var fail = graphql.ID("0")
+	if err != nil {
+		fmt.Println(err)
+		return &fail
+	}
+	fmt.Println(p)
+	var succ = graphql.ID(p.Id.Hex())
+	return &succ
 }
 
 // User can book a role if the role is not yet taken.

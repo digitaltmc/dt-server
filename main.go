@@ -3,10 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
-  "os"
+	"os"
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
+	"github.com/rs/cors"
 )
 
 var schema *graphql.Schema
@@ -25,9 +26,10 @@ func main() {
 		w.Write(page)
 	}))
 
-	http.Handle("/graphql", &relay.Handler{Schema: schema})
+	handler := cors.Default().Handler(&relay.Handler{Schema: schema})
+	http.Handle("/graphql", handler)
 
-	log.Fatal(http.ListenAndServe(":" + port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
 var page = []byte(`
