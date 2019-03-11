@@ -68,35 +68,35 @@ type PersonInput struct {
 //  MembershipUntil string
 //  Achievements []MeetingItem
 
-type RolesEnum int
+type MeetingRolesEnum int
 
 const (
-	TMD         RolesEnum = iota
-	TTM         RolesEnum
-	TTIE        RolesEnum
-	GE          RolesEnum
-	AhCounter   RolesEnum
-	Grammarian  RolesEnum
-	Timer       RolesEnum
-	ShareMaster RolesEnum
-	Speaker     RolesEnum
-	IE          RolesEnum
-  RolePresident RolesEnum
-  RoleSAA RolesEnum
-  RoleVPM RolesEnum
-  RoleVPE RolesEnum
+	TMD         MeetingRolesEnum = iota
+	TTM
+	TTIE
+	GE
+	AhCounter
+	Grammarian
+	Timer
+	ShareMaster
+	Speaker
+	IE
+  RolePresident
+  RoleSAA
+  RoleVPM
+  RoleVPE
 )
 
 type OfficersEnum int
 
 const (
-	President OfficersEnum = 0
-	VPE       OfficersEnum = 1
-	VPM       OfficersEnum = 2
-	VPPR      OfficersEnum = 3
-	Treasurer OfficersEnum = 4
-	Secretary OfficersEnum = 5
-	SAA       OfficersEnum = 6
+	President OfficersEnum = iota
+	VPE
+	VPM
+	VPPR
+	Treasurer
+	Secretary
+	SAA
 )
 
 //---------- Query
