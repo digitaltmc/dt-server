@@ -29,7 +29,7 @@ func main() {
 	handler := cors.Default().Handler(&relay.Handler{Schema: schema})
 	http.Handle("/graphql", handler)
 
-	log.Fatal(http.ListenAndServe(":"+port, handler))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 var page = []byte(`
