@@ -1,9 +1,9 @@
 package main
 
-func makeMeetingItemResolver(agenda []*MeetingItem) []*MeetingItemResolver {
-  ret := make([]*MeetingItemResolver, len(agenda))
+func makeMeetingItemResolver(agenda []*MeetingItem) []*meetingItemResolver {
+  ret := make([]*meetingItemResolver, len(agenda))
   for i, v := range agenda {
-    ret[i] = &MeetingItemResolver{v}
+    ret[i] = &meetingItemResolver{v}
   }
   return ret
 }

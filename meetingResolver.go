@@ -3,42 +3,39 @@ package main
 import (
   "fmt"
   "regexp"
-
 	"github.com/graph-gophers/graphql-go"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
+   "github.com/mongodb/mongo-go-driver/bson"
+   "github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 // 	"log"
 // 	"net/http"
-//
+// 
 // 	"github.com/graph-gophers/graphql-go/relay"
 
 //  "github.com/friendsofgo/graphiql"
 //  "github.com/mnmtanish/go-graphiql"
 
+
 // 	"github.com/rs/cors"
+
 
 type Resolver struct{}
 
 //----------
 
 type Meeting struct {
-  id graphql.ID
-  agenda []*MeetingItem
-  date string
+  ID primitive.ObjectID `bson:"_id,omitempty"`
+  Date graphql.Time `bson: "date"`
+  Agenda []*MeetingItem `bson: "agenda"`
 }
-
 type MeetingItem struct {
-  Role Role
-  Duration float64
-  Title string
-}
-
-type Role struct {
-  Name MeetingRolesEnum
-  Member Person
+  ID primitive.ObjectID `bson:"_id,omitempty"`
+  Role string `bson: "role"`
+  Member primitive.ObjectID `bson: "member"`
+  Duration float64 `bson: "duration"`
+  Title string `bson: "title"`
 }
 
 type Person struct {
@@ -48,7 +45,7 @@ type Person struct {
   Mobile string
   Email string
   IsMember bool
-  OfficerRole OfficersEnum
+  OfficerRole string
   JoinedSince string
   MembershipUntil string
   Achievements []*MeetingItem
@@ -58,51 +55,13 @@ type PersonInput struct {
 	Name     string
 	Password string
 	Email    string
-	Mobile   string
+  Mobile   *string
+  IsMember *bool
+  JoinedSince *string
+  MembershipUntil *string
 }
-
-//  Mobile string
-//  Email string
-//  IsMember bool
-//  JoinedSince string
-//  MembershipUntil string
-//  Achievements []MeetingItem
-
-type MeetingRolesEnum int
-
-const (
-	TMD         MeetingRolesEnum = iota
-	TTM
-	TTIE
-	GE
-	AhCounter
-	Grammarian
-	Timer
-	ShareMaster
-	Speaker
-	IE
-  RolePresident
-  RoleSAA
-  RoleVPM
-  RoleVPE
-)
-
-type OfficersEnum int
-
-const (
-	President OfficersEnum = iota
-	VPE
-	VPM
-	VPPR
-	Treasurer
-	Secretary
-	SAA
-)
-
-//---------- Query
-
+var currentID primitive.ObjectID
 func (_ *Resolver) Hello() string { return "Hello, world!" }
-
 //---------- Mutations
 
 func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
@@ -128,7 +87,7 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
       {"name", arg.Person.Name},
       {"password", arg.Person.Password},
 			{"email", arg.Person.Email},
-			{"mobile", arg.Person.Mobile},
+      {"mobile", arg.Person.Mobile},
     },
   )
   if ins_err != nil {
@@ -187,105 +146,99 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
 		fmt.Println(err)
 		return &fail
 	}
-	fmt.Println(p)
+  fmt.Println(p)
+  currentID=p.Id
 	var succ = graphql.ID(p.Id.Hex())
 	return &succ
 }
 
-// User can book a role if the role is not yet taken.
-// User may book many roles in a meeting. - As long as they can handle.
-func (_ *Resolver) Book(arg *struct {
-  Person graphql.ID
-  Date string
-  Role MeetingRolesEnum
-  Title *string
-}) *MeetingResolver {
+func GetBooker(currentdate graphql.Time) *Meeting{
+  var meeting Meeting
   ctx, collection := GetMongo("meeting")
+  filter := bson.D{{"date", currentdate},}
+  err := collection.FindOne(ctx, filter).Decode(&meeting)
+  if err != nil {
+    fmt.Println("!!!!!!!!!!!!",err)
+    return nil
+  }
+  return &meeting
+}
+func (_ *Resolver) Book(args struct{
+  Date graphql.Time
+  Role *string 
+  Title *string
+  }) *meetingResolver {
+    currentdate := args.Date
+    fmt.Println("[current date] ",currentdate)
+    booker := GetBooker(currentdate)
+  
 
-  res := collection.FindOne(
-    ctx,
-    bson.D{
-      {"date", arg.Date},
-    },
-  )
-  fmt.Println(res)
-  m := Meeting{graphql.ID(0), nil, ""}
-  mr := &MeetingResolver{&m}
-  return mr
-//  if err != nil {
-//    fmt.Println(err)
-//  }
-//  if cnt != 0 {
-//    fmt.Printf("User already exists: %v", arg.Person.Name)
-//    return &fail
-//  }
-//
-//  collection.InsertOne(
-//    ctx,
-//    bson.D{
-//      {"name", arg.Person.Name},
-//      {"password", arg.Person.Password},
-//    },
-//  )
+    if booker == nil {
+      ctx, collection := GetMongo("meeting")
+      _,error := collection.InsertOne(
+        ctx,
+        bson.D{
+          {"date", currentdate},
+          {"agenda",          
+            bson.A{
+              bson.D{
+                {"role",args.Role},
+                {"duration",7.30},
+                {"title",args.Title},
+                {"member",currentID},
+              },
+            },
+          },
+          
+        },
+      )
+      fmt.Println("Inserted ",error)
+      booker=GetBooker(currentdate)
+    // ToDo insert new meeting
+  }
+  // fmt.Println(meeting,meeting.id)
+  return &meetingResolver{booker}
 }
 
-//---------- MeetingResolver
-
-type MeetingResolver struct {
+type meetingResolver struct{
   m *Meeting
 }
-
-func (r *MeetingResolver) Id() graphql.ID {
-	return r.m.id
+func (r *meetingResolver) ID() graphql.ID{return graphql.ID(r.m.ID.Hex())}
+// Please convert the time to UTC as the graphql.Time belong to ISO with time.RFC3339
+func (r *meetingResolver) Date() graphql.Time {
+  fmt.Println("Graphql Time ",r.m.Date)
+  fmt.Println("The UTC Time ",r.m.Date.Time.UTC())
+  return r.m.Date
 }
+func (r *meetingResolver) Agenda() *[]*meetingItemResolver{
+  l := make([]*meetingItemResolver, len(r.m.Agenda))
 
-func (r *MeetingResolver) Agenda() *[]*MeetingItemResolver {
-  ret := make([]*MeetingItemResolver, len(r.m.agenda))
-  for i, v := range r.m.agenda {
-    ret[i] = &MeetingItemResolver{v}
+	for i, _ := range r.m.Agenda {
+    l[i] = &meetingItemResolver{r.m.Agenda[i]}
+    fmt.Println("Agenda RoleName",r.m.Agenda[i].Role)
+	}
+	return &l
+}
+type meetingItemResolver struct{
+  mi *MeetingItem
+}
+func(r *meetingItemResolver)ID() graphql.ID{return graphql.ID(r.mi.ID.Hex())}
+func(r *meetingItemResolver)Role() *string{
+  return &r.mi.Role
+}
+func(r *meetingItemResolver)Member() *PersonResolver{
+  var person Person
+  ctx, collection := GetMongo("person")
+  filter := bson.D{{"_id",r.mi.Member},}
+  err := collection.FindOne(ctx, filter).Decode(&person)
+  if err != nil {
+    fmt.Println(err)
+    return nil
   }
-	return &ret
+  return &PersonResolver{&person}
 }
-
-func (r *MeetingResolver) Date() *string {
-	return &r.m.date
-}
-
-
-//---------- MeetingItemResolver
-
-type MeetingItemResolver struct {
-  m *MeetingItem
-}
-
-func (r *MeetingItemResolver) Role() *RoleResolver {
-  rr := RoleResolver{&r.m.Role}
-	return &rr
-}
-
-func (r *MeetingItemResolver) Duration() *float64 {
-	return &r.m.Duration
-}
-
-func (r *MeetingItemResolver) Title() *string {
-	return &r.m.Title
-}
-
-//---------- RoleResolver
-
-type RoleResolver struct {
-  r *Role
-}
-
-func (r *RoleResolver) Name() *MeetingRolesEnum {
-	return &r.r.Name
-}
-
-func (r *RoleResolver) Member() *PersonResolver {
-  rr := PersonResolver{&r.r.Member}
-	return &rr
-}
-
+func(r *meetingItemResolver)Duration() *float64{return &r.mi.Duration}
+func(r *meetingItemResolver)Title() *string{return &r.mi.Title}
 //---------- PersonResolver
 
 type PersonResolver struct {
@@ -293,7 +246,7 @@ type PersonResolver struct {
 }
 
 func (r *PersonResolver) Id() graphql.ID {
-  ret := graphql.ID(r.r.Id.String())
+  ret := graphql.ID(r.r.Id.Hex())
 	return ret
 }
 
@@ -309,11 +262,11 @@ func (r *PersonResolver) Mobile() *string {
 	return &r.r.Mobile
 }
 
-func (r *PersonResolver) Email() *string {
-	return &r.r.Email
+func (r *PersonResolver) Email() string {
+	return r.r.Email
 }
 
-func (r *PersonResolver) OfficerRole() *OfficersEnum {
+func (r *PersonResolver) OfficerRole() *string {
 	return &r.r.OfficerRole
 }
 
@@ -329,8 +282,37 @@ func (r *PersonResolver) MembershipUntil() *string {
 	return &r.r.MembershipUntil
 }
 
-func (r *PersonResolver) Achievements() *[]*MeetingItemResolver {
+func (r *PersonResolver) Achievements() *[]*meetingItemResolver {
 	ret := makeMeetingItemResolver(r.r.Achievements)
 	return &ret
 }
+/*
+1. Data structor: enum/meetingItem & Role
+2. book's paramter
+3. logic to get the agenda from book
+mutation {
+  register(person:{name:"Wow",password:"world",email:"aaa@sap.com",mobile:"888888"})
+}
+{
+  login(user:"Wow",password:"world")
+}
+
+mutation {
+  book(date: "2019-03-11T00:00:00Z", role: Speaker, title: "Hey buddy") {
+    date
+    agenda {
+      role
+      title
+      duration
+      member{
+        name
+        mobile
+        email
+        id
+      }
+    }
+  }
+}
+*/
+
 
