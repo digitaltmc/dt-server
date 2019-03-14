@@ -3,10 +3,17 @@ package main
 // import (
 // 	"log"
 // 	"net/http"
-//
+// 
 // 	"github.com/graph-gophers/graphql-go"
 // 	"github.com/graph-gophers/graphql-go/relay"
 // )
+
+// 	"github.com/rs/cors"
+
+// 	"github.com/mongodb/mongo-go-driver/bson"
+
+//  "github.com/friendsofgo/graphiql"
+//  "github.com/mnmtanish/go-graphiql"
 
 
 // Schema describes the data that we ask for
@@ -22,13 +29,15 @@ var Schema = `
 
       login(user: String!, password: String!): ID
 #      meetings: [Meeting]
-#      meeting(date: String): Meeting
+      #meeting(date: String): Meeting!
     }
 
     type Mutation {
       register(person: PersonInput): ID
-      book(person: ID!, date: String!, role: String!, title: String): Meeting
+      book(date: Time!, role: MeetingRolesEnum, title: String): Meeting
     }
+
+    scalar Time
 
     type Post {
         id: ID!
@@ -39,25 +48,22 @@ var Schema = `
     type Meeting {
       id: ID!
       agenda: [MeetingItem]
-      date: String
+      date: Time!
     }
 
     type MeetingItem {
-      role: Role
+      id: ID!
+      role: MeetingRolesEnum
+      member: Person
       duration: Float
       title: String
-    }
-
-    type Role {
-      name: MeetingRolesEnum
-      member: Person
     }
 
     type Person {
       id: ID!
       name: String
       mobile: String
-      email: String
+      email: String!
       password: String
       officerRole: OfficersEnum
       isMember: Boolean
@@ -68,13 +74,11 @@ var Schema = `
     input PersonInput {
       name: String!
       password: String!
+      mobile: String
       email: String!
-      mobile: String!
-
-#      isMember: Boolean!
-#      joinedSince: String
-#      membershipUntil: String
-#      achievements: [ MeetingItem ]
+      isMember: Boolean
+      joinedSince: String
+      membershipUntil: String
     }
 
     enum MeetingRolesEnum {
@@ -88,10 +92,10 @@ var Schema = `
       ShareMaster
       Speaker
       IE
-      RolePresident
-      RoleSAA
-      RoleVPM
-      RoleVPE
+      President
+      SAA
+      VPM
+      VPE
     }
 
     enum OfficersEnum {
@@ -104,3 +108,4 @@ var Schema = `
       SAA
     }
     `
+

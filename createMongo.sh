@@ -3,8 +3,9 @@
 # docker pull mongo
 
 function _default () {
-docker volume create dt_data
-docker run -d --rm --name dt_data \
+#sudo docker volume create dt_data
+sudo docker run -d --rm --name dt_data \
+  -v "$PWD/dt_data":/data/db \
   -e MONGO_INITDB_DATABASE=dt \
   -p 27017:27017 \
   mongo
