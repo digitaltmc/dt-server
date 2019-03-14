@@ -4,6 +4,7 @@ import (
 	"context"
   "fmt"
 	"log"
+  "strings"
 	"time"
 	"os"
 	"github.com/joho/godotenv"
@@ -14,6 +15,7 @@ import (
 )
 
 var host string
+var dbName string
 
 func init() {
 	e := godotenv.Load()
@@ -21,6 +23,17 @@ func init() {
 		fmt.Print(e)
 	}
   host = os.Getenv("MONGODB_URI")
+  fmt.Println(`MONGO_URI: ` + host)
+  // Get the string without protocol
+  host_splited := strings.Split(host, "//")
+  // Get the dbname, if there is any
+  host_splited = strings.Split(host_splited[len(host_splited)-1], "/")
+  if len(host_splited) == 2 {
+    dbName = host_splited[len(host_splited)-1]
+  } else {
+    dbName = "digitaltmc"
+  }
+  fmt.Println(`dbName: ` + dbName)
 }
 
 // Cleanup will remove all mock data from the database.
@@ -61,6 +74,6 @@ func GetMongo(col string) (context.Context, *mongo.Collection) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := client.Database("digitaltmc").Collection(col)
+	collection := client.Database(dbName).Collection(col)
 	return ctx, collection
 }
