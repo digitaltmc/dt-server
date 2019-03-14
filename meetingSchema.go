@@ -3,17 +3,8 @@ package main
 // import (
 // 	"log"
 // 	"net/http"
-// 
-// 	"github.com/graph-gophers/graphql-go"
-// 	"github.com/graph-gophers/graphql-go/relay"
 // )
 
-// 	"github.com/rs/cors"
-
-// 	"github.com/mongodb/mongo-go-driver/bson"
-
-//  "github.com/friendsofgo/graphiql"
-//  "github.com/mnmtanish/go-graphiql"
 
 
 // Schema describes the data that we ask for

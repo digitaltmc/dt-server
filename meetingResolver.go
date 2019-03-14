@@ -5,21 +5,9 @@ import (
   "regexp"
 	"github.com/graph-gophers/graphql-go"
 
-   "github.com/mongodb/mongo-go-driver/bson"
-   "github.com/mongodb/mongo-go-driver/bson/primitive"
+   "go.mongodb.org/mongo-driver/bson"
+   "go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-// 	"log"
-// 	"net/http"
-// 
-// 	"github.com/graph-gophers/graphql-go/relay"
-
-//  "github.com/friendsofgo/graphiql"
-//  "github.com/mnmtanish/go-graphiql"
-
-
-// 	"github.com/rs/cors"
-
 
 type Resolver struct{}
 
@@ -67,7 +55,7 @@ func (_ *Resolver) Hello() string { return "Hello, world!" }
 func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
 
   ctx, collection := GetMongo("person")
-  cnt, err := collection.Count(
+  cnt, err := collection.CountDocuments(
     ctx,
     bson.D{
       {"name", arg.Person.Name},
@@ -129,6 +117,7 @@ func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 }
 
 func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
+  fmt.Println(arg)
 	ctx, collection := GetMongo("person")
 	c := collection.FindOne(
 		ctx,
@@ -146,8 +135,9 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
 		fmt.Println(err)
 		return &fail
 	}
+
   fmt.Println(p)
-  currentID=p.Id
+  currentID = p.Id
 	var succ = graphql.ID(p.Id.Hex())
 	return &succ
 }

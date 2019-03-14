@@ -8,9 +8,9 @@ import (
 	"os"
 	"github.com/joho/godotenv"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
-  "github.com/mongodb/mongo-go-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+  "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var host string
@@ -37,6 +37,7 @@ func Cleanup(col string) {
 
 // GetMongo returns the session and a reference to the post collection.
 func GetMongo(col string) (context.Context, *mongo.Collection) {
+
 //  auth := options.Credential{
 //    "MONGODB-CR",
 //    nil,
@@ -44,14 +45,19 @@ func GetMongo(col string) (context.Context, *mongo.Collection) {
 //    "admin",
 //    "password",
 //  }
-	var options options.ClientOptions
-	maxWait := time.Duration(5 * time.Second)
-	options.SetConnectTimeout(maxWait)
-//	options.SetAuth(auth)
+// 	var options options.ClientOptions
+// 	maxWait := time.Duration(5 * time.Second)
+// 	options.SetConnectTimeout(maxWait)
+// //	options.SetAuth(auth)
+// 
+// 	ctx := context.Background()
 
-	ctx := context.Background()
+	// client, err := mongo.Connect(ctx, host, &options)
 
-	client, err := mongo.Connect(ctx, host, &options)
+  // Use one-stop solution instead.
+  ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+  client, err := mongo.Connect(ctx, options.Client().ApplyURI(host))
+
 	if err != nil {
 		log.Fatal(err)
 	}
