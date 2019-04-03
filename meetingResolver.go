@@ -153,6 +153,16 @@ func GetBooker(currentdate graphql.Time) *Meeting{
   }
   return &meeting
 }
+func (_ *Resolver) Meeting(args struct{
+  Date graphql.Time}) *meetingResolver{
+    currentdate := args.Date
+    fmt.Println("[current date] ",currentdate)
+    booker := GetBooker(currentdate)
+    if booker != nil {
+      return &meetingResolver{booker}
+    }
+    return nil
+  }
 func (_ *Resolver) Book(args struct{
   Date graphql.Time
   Role *string 

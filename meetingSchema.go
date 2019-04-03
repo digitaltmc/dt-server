@@ -19,8 +19,8 @@ var Schema = `
       wxLogin(code: String!): String!
 
       login(user: String!, password: String!): ID
-#      meetings: [Meeting]
-      #meeting(date: String): Meeting!
+      #meetings: [Meeting]
+      meeting(date: Time!): Meeting!
     }
 
     type Mutation {
