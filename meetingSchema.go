@@ -19,7 +19,7 @@ var Schema = `
       wxLogin(code: String!): String!
 
       login(user: String!, password: String!): ID
-      #meetings: [Meeting]
+      meetings: [Meeting]
       meeting(date: Time!): Meeting!
     }
 

@@ -3,10 +3,13 @@ package main
 import (
   "fmt"
   "regexp"
+  "context"
+  "time"
 	"github.com/graph-gophers/graphql-go"
 
-   "go.mongodb.org/mongo-driver/bson"
-   "go.mongodb.org/mongo-driver/bson/primitive"
+  "go.mongodb.org/mongo-driver/mongo"
+  "go.mongodb.org/mongo-driver/bson"
+  "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Resolver struct{}
@@ -163,6 +166,57 @@ func (_ *Resolver) Meeting(args struct{
     }
     return nil
   }
+
+  func DecodeBookList(cursor *mongo.Cursor) []Meeting{
+    // Largest size is 52 weeks
+      meetings:=make([]Meeting,52)
+      i:=0
+      for cursor.Next(context.Background()) {
+        cursor.Decode(&meetings[i])
+        i++
+      }
+      fmt.Println("result length",i)
+      return meetings[0:i]
+  }
+  func ContainsKey(doc bson.Raw, key ...string) bool {
+    _, err := doc.LookupErr(key...)
+    if err != nil {
+      return false
+    }
+    return true
+  }
+  func GetBookers() []Meeting{
+    ctx, collection := GetMongo("meeting")
+    var currentdate=graphql.Time{Time: time.Now()}
+    limiteddate:=currentdate.AddDate(-1,0,0)
+    fmt.Println("!!!!!!",limiteddate)
+    //TODO set the limitation of query date
+    // filter := bson.D{{"date", bson.D{{"$lt", currentdate},{"$gt", limiteddate},}},}
+    filter := bson.D{{"date", bson.D{{"$lt", currentdate},}},}
+    cursor, err := collection.Find(ctx, filter)
+ 
+    if err != nil {
+      fmt.Println("!!!!!!!!!!!!",err)
+      return nil
+    }
+    return DecodeBookList(cursor)
+  }
+
+func (_ *Resolver) Meetings() *[]*meetingResolver{
+  bookers := GetBookers()
+  if bookers != nil {
+
+
+    bookerlist := make([]*meetingResolver, len(bookers))
+
+    for i, _ := range bookers {
+      bookerlist[i] = &meetingResolver{&bookers[i]}
+    }
+
+    return &bookerlist
+  }
+  return nil
+}
 func (_ *Resolver) Book(args struct{
   Date graphql.Time
   Role *string 
