@@ -19,10 +19,10 @@ func init() {
 
 func main() {
 	port := os.Getenv("PORT")
-  fmt.Printf("Port: %v\n", port)
 	if port == "" {
 		port = "58080" //localhost
 	}
+  fmt.Printf("Port: %v\n", port)
 
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(page)
