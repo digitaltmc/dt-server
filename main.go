@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+  "fmt"
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
@@ -18,6 +19,7 @@ func init() {
 
 func main() {
 	port := os.Getenv("PORT")
+  fmt.Printf("Port: %v\n", port)
 	if port == "" {
 		port = "58080" //localhost
 	}
