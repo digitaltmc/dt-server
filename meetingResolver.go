@@ -61,7 +61,7 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
   cnt, err := collection.CountDocuments(
     ctx,
     bson.D{
-      {"name", arg.Person.Name},
+      {"email", arg.Person.Name},
     },
   )
   if err != nil {
@@ -125,7 +125,7 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
 	c := collection.FindOne(
 		ctx,
 		bson.D{
-			{"name", arg.User},
+			{"email", arg.User},
 			{"password", arg.Password},
 		},
 	)
