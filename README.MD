@@ -17,7 +17,11 @@ mutation {
 - Loigin
 ```
 {
-  login(user:"Wow",password:"world")
+  login(user:"Wow",password:"world"){
+    id
+    name
+    email
+  }
 }
 ```
 - Book

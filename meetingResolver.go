@@ -119,7 +119,7 @@ func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 	}
 }
 
-func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
+func (_ *Resolver) Login(arg *struct{ User, Password string }) *PersonResolver {
   fmt.Println(arg)
 	ctx, collection := GetMongo("person")
 	c := collection.FindOne(
@@ -131,18 +131,16 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
 	)
 
 	var p Person
-	var err = c.Decode(&p)
-
-	var fail = graphql.ID("0")
-	if err != nil {
-		fmt.Println(err)
-		return &fail
-	}
-
-  fmt.Println(p)
-  currentID = p.Id
-	var succ = graphql.ID(p.Id.Hex())
-	return &succ
+  var err = c.Decode(&p)
+  if err != nil {
+    fmt.Println("!!!!!!!!!!!!",err)
+    return nil
+  }
+  if &p != nil {
+    return &PersonResolver{&p}
+  }else{
+    return nil
+  } 
 }
 
 func GetBooker(currentdate graphql.Time) *Meeting{
