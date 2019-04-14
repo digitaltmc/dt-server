@@ -72,13 +72,18 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
     return nil
   }
 
+  mobile := arg.Person.Mobile
+  defaultMobile := ""
+  if mobile == nil {
+    mobile = &defaultMobile
+  }
   insertRes, ins_err := collection.InsertOne(
     ctx,
     bson.D{
       {"name", arg.Person.Name},
       {"password", arg.Person.Password},
 			{"email", arg.Person.Email},
-      {"mobile", arg.Person.Mobile},
+      {"mobile", mobile},
     },
   )
   if ins_err != nil {
