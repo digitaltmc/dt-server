@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-  "fmt"
+//  "fmt"
 	"log"
   "strings"
 	"time"
@@ -20,10 +20,10 @@ var dbName string
 func init() {
 	e := godotenv.Load()
 	if e != nil {
-		fmt.Print(e)
+		log.Print(e)
 	}
   host = os.Getenv("MONGODB_URI")
-  fmt.Println(`MONGO_URI: ` + host)
+  log.Println(`MONGO_URI: ` + host)
   // Get the string without protocol
   host_splited := strings.Split(host, "//")
   // Get the dbname, if there is any
@@ -33,7 +33,7 @@ func init() {
   } else {
     dbName = "digitaltmc"
   }
-  fmt.Println(`dbName: ` + dbName)
+  log.Println(`dbName: ` + dbName)
 }
 
 // Cleanup will remove all mock data from the database.

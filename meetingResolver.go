@@ -4,6 +4,7 @@ import (
   "fmt"
   "regexp"
   "context"
+  "log"
   "time"
 	"github.com/graph-gophers/graphql-go"
 
@@ -46,10 +47,10 @@ type PersonInput struct {
 	Name     string
 	Password string
 	Email    string
-  Mobile   *string
-  IsMember *bool
-  JoinedSince *string
-  MembershipUntil *string
+  Mobile   *string `bson:",omitempty"`
+  IsMember *bool `bson:",omitempty"`
+  JoinedSince *string `bson:",omitempty"`
+  MembershipUntil *string `bson:",omitempty"`
 }
 var currentID primitive.ObjectID
 func (_ *Resolver) Hello() string { return "Hello, world!" }
@@ -65,29 +66,24 @@ func (_ *Resolver) Register(arg *struct {Person *PersonInput}) *graphql.ID {
     },
   )
   if err != nil {
-    fmt.Println(err)
+    log.Println(err)
   }
   if cnt != 0 {
-    fmt.Printf("User already exists: %v\n", arg.Person.Name)
+    log.Printf("User already exists: %v\n", arg.Person.Name)
     return nil
   }
 
-  mobile := arg.Person.Mobile
-  defaultMobile := ""
-  if mobile == nil {
-    mobile = &defaultMobile
-  }
-  insertRes, ins_err := collection.InsertOne(
+  insertRes, err := collection.InsertOne(
     ctx,
     bson.D{
       {"name", arg.Person.Name},
       {"password", arg.Person.Password},
 			{"email", arg.Person.Email},
-      {"mobile", mobile},
+      {"mobile", CheckNilString(arg.Person.Mobile)},
     },
   )
-  if ins_err != nil {
-    fmt.Printf("Insert error: %v\n", ins_err)
+  if err != nil {
+    log.Printf("Insert error: %v\n", err)
     return nil
   }
 

@@ -1,0 +1,114 @@
+
+** Scenarios
+
+Case 1
+
+- User register
+- User confirm from email
+- User login
+- User book a role
+- User book another role
+- User unbook a role
+- User change date and book a role
+
+Case 2
+
+- User request to reset password
+- User confirm from email
+- User reset password
+
+Case 3
+
+- Visitors see all the booking info
+- Visitors change date
+
+Case 4
+
+** Cases
+
+*** User register
+
+#+BEGIN_SRC 
+mutation {
+  register(person: {name: "owen", password: "pwd", email:"owen@1.com"})
+}
+
+// Expected result:
+{
+  "data": {
+    "register": "5cb358b77fb13388c4fb8a13"
+  }
+}
+#+END_SRC
+
+#+BEGIN_SRC 
+
+#+END_SRC
+
+*** User login
+
+#+BEGIN_SRC 
+{
+  login(user: "owen", password: "pwd")
+}
+
+// Expected result
+{
+  "data": {
+    "login": "5ca193310fcf5ab7cea26d33"
+  }
+}
+#+END_SRC
+
+*** Book a role
+
+#+BEGIN_SRC 
+mutation {
+  book(date: "2019-03-11T00:00:00Z", role: Speaker, title: "Hey buddy") {
+    date
+    agenda {
+      role
+      title
+      duration
+      member{
+        name
+        mobile
+        email
+        id
+      }
+    }
+  }
+}
+#+END_SRC
+
+*** Get meeting
+
+#+BEGIN_SRC 
+{
+  meetings {
+    id
+    agenda {
+      role
+    }
+    date
+  }
+}
+
+// Result
+
+{
+  "data": {
+    "meetings": [
+      {
+        "id": "5cb363d879b9d79d729dd9f4",
+        "agenda": [
+          {
+            "role": "Speaker"
+          }
+        ],
+        "date": "2019-03-11T08:00:00+08:00"
+      }
+    ]
+  }
+}
+#+END_SRC
