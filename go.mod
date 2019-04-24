@@ -1,7 +1,9 @@
 module github.com/silencej/poc
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/friendsofgo/graphiql v0.2.1
+	github.com/go-session/session v3.1.2+incompatible
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/graph-gophers/graphql-go v0.0.0-20190205233743-95e4a602e3fa
@@ -13,5 +15,5 @@ require (
 	go.mongodb.org/mongo-driver v1.0.0
 	golang.org/x/crypto v0.0.0-20190131182504-b8fe1690c613 // indirect
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/text v0.3.0 // indirect
+	gopkg.in/oauth2.v3 v3.10.0
 )

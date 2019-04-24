@@ -128,17 +128,15 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *graphql.ID {
 	)
 
 	var p Person
-	var err = c.Decode(&p)
-
-	var fail = graphql.ID("0")
-	if err != nil {
+	if err := c.Decode(&p); err != nil {
 		fmt.Println(err)
+  	fail := graphql.ID("0")
 		return &fail
 	}
 
   fmt.Println(p)
   currentID = p.Id
-	var succ = graphql.ID(p.Id.Hex())
+	succ := graphql.ID(p.Id.Hex())
 	return &succ
 }
 

@@ -31,6 +31,8 @@ func main() {
 	handler := cors.Default().Handler(&relay.Handler{Schema: schema})
 	http.Handle("/graphql", handler)
 
+  setupOauthServer()
+
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
