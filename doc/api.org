@@ -36,13 +36,9 @@ mutation {
 // Expected result:
 {
   "data": {
-    "register": "5cb358b77fb13388c4fb8a13"
+    "register": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoRXhwaXJ5RGF0ZVRpbWUiOiIyMDE5LTA1LTEyVDIxOjUyOjUyLjY4NDA5OSswODowMCIsIm5hbWUiOiJvd2VuIn0.f5aStzmRd_GRQjk-XHbJSQr225YpZDhvfcSwYSj473A"
   }
 }
-#+END_SRC
-
-#+BEGIN_SRC 
-
 #+END_SRC
 
 *** User login
@@ -55,7 +51,7 @@ mutation {
 // Expected result
 {
   "data": {
-    "login": "5ca193310fcf5ab7cea26d33"
+    "login": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoRXhwaXJ5RGF0ZVRpbWUiOiIyMDE5LTA1LTEyVDIyOjA0OjMzLjUwNjAzKzA4OjAwIiwibmFtZSI6Im93ZW4ifQ.2gyR1U1sonXtr9qS_KJCp8kbUpw3D65XcYoa0OZu3ZU"
   }
 }
 #+END_SRC
@@ -112,3 +108,16 @@ mutation {
   }
 }
 #+END_SRC
+
+** Ideas
+
+Q: How we do auth in pure GraphQL
+A: Refer https://medium.com/the-graphqlhub/graphql-and-authentication-b73aed34bbeb
+We are using the third way: pure GraphQL.
+User register and user login will both return a jwt token. The client can save locally.
+The jwt token should include:
+- Expiration time
+- email
+- name
+Every endpoint requiring auth requires the user to input token.
+
