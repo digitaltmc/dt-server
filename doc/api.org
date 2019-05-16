@@ -121,6 +121,7 @@ The jwt token should include:
 - name
 Every endpoint requiring auth requires the user to input token.
 
+<<<<<<< HEAD
 *** Meeting templates
 
 Club officers can create and modify meeting templates, e.g. meeting template change for a new setup.
@@ -128,3 +129,5 @@ Club officers can adjust one meeting, e.g. replace TTM/TTIE with Sharing.
 
 So we need a meeting template document.
 
+=======
+>>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
