@@ -1,11 +1,7 @@
 module github.com/silencej/poc
 
 require (
-<<<<<<< HEAD
 	github.com/alexedwards/scs v1.4.1
-=======
-	github.com/alexedwards/scs v1.4.1 // indirect
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/friendsofgo/graphiql v0.2.1
 	github.com/fsnotify/fsnotify v1.4.7

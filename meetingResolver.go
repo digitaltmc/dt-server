@@ -26,11 +26,7 @@ type MeetingItem struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	Role     string             `bson: "role"`
 	Member   primitive.ObjectID `bson: "member"`
-<<<<<<< HEAD
 	Duration int                `bson: "duration"` // In seconds
-=======
-	Duration float64            `bson: "duration"`
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
 	Title    string             `bson: "title"`
 }
 
@@ -240,11 +236,8 @@ func (_ *Resolver) Meetings() *[]*meetingResolver {
 	}
 	return nil
 }
-<<<<<<< HEAD
+
 func (_ *Resolver) BookOld(args struct {
-=======
-func (_ *Resolver) Book(args struct {
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
 	Token string
 	Date  graphql.Time
 	Role  *string
@@ -326,13 +319,9 @@ func (r *meetingItemResolver) Member() *PersonResolver {
 	}
 	return &PersonResolver{&person}
 }
-<<<<<<< HEAD
+
 func (r *meetingItemResolver) Duration() *int { return &r.mi.Duration }
 func (r *meetingItemResolver) Title() *string { return &r.mi.Title }
-=======
-func (r *meetingItemResolver) Duration() *float64 { return &r.mi.Duration }
-func (r *meetingItemResolver) Title() *string     { return &r.mi.Title }
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
 
 //---------- PersonResolver
 

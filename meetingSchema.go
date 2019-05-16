@@ -23,11 +23,7 @@ var Schema = `
 
     type Mutation {
       register(person: PersonInput): String
-<<<<<<< HEAD
       book(token: String!, date: Time!, roleName: String, title: String): Boolean
-=======
-      book(token: String!, date: Time!, role: MeetingRolesEnum, title: String): Meeting
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
     }
 
     scalar Time
