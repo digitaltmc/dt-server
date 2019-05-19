@@ -19,18 +19,14 @@ type Resolver struct{}
 
 type Meeting struct {
 	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	Date   graphql.Time       `bson: "date"`
+	Date   string             `bson: "date"`
 	Agenda []*MeetingItem     `bson: "agenda"`
 }
 type MeetingItem struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	Role     string             `bson: "role"`
 	Member   primitive.ObjectID `bson: "member"`
-<<<<<<< HEAD
-	Duration int                `bson: "duration"` // In seconds
-=======
-	Duration float64            `bson: "duration"`
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
+	Duration string             `bson: "duration"`
 	Title    string             `bson: "title"`
 }
 
@@ -168,7 +164,7 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *string {
 	return &ret
 }
 
-func GetMeeting(currentdate graphql.Time) *Meeting {
+func GetMeeting(currentdate string) *Meeting {
 	var meeting Meeting
 	ctx, collection := GetMongo("meeting")
 	filter := bson.D{{"date", currentdate}}
@@ -180,7 +176,7 @@ func GetMeeting(currentdate graphql.Time) *Meeting {
 	return &meeting
 }
 func (_ *Resolver) Meeting(args struct {
-	Date graphql.Time
+	Date string
 }) *meetingResolver {
 	currentdate := args.Date
 	fmt.Println("[current date] ", currentdate)
@@ -211,7 +207,7 @@ func ContainsKey(doc bson.Raw, key ...string) bool {
 }
 func GetBookers() []Meeting {
 	ctx, collection := GetMongo("meeting")
-	var currentdate = graphql.Time{Time: time.Now()}
+	var currentdate = time.Now()
 	limiteddate := currentdate.AddDate(-1, 0, 0)
 	fmt.Println("!!!!!!", limiteddate)
 	//TODO set the limitation of query date
@@ -240,13 +236,10 @@ func (_ *Resolver) Meetings() *[]*meetingResolver {
 	}
 	return nil
 }
-<<<<<<< HEAD
+
 func (_ *Resolver) BookOld(args struct {
-=======
-func (_ *Resolver) Book(args struct {
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
 	Token string
-	Date  graphql.Time
+	Date  string
 	Role  *string
 	Title *string
 }) *meetingResolver {
@@ -269,7 +262,7 @@ func (_ *Resolver) Book(args struct {
 					bson.A{
 						bson.D{
 							{"role", args.Role},
-							{"duration", 7.30},
+							{"duration", "7.30"},
 							{"title", args.Title},
 							{"member", userId},
 						},
@@ -292,9 +285,9 @@ type meetingResolver struct {
 func (r *meetingResolver) ID() graphql.ID { return graphql.ID(r.m.ID.Hex()) }
 
 // Please convert the time to UTC as the graphql.Time belong to ISO with time.RFC3339
-func (r *meetingResolver) Date() graphql.Time {
-	fmt.Println("Graphql Time ", r.m.Date)
-	fmt.Println("The UTC Time ", r.m.Date.Time.UTC())
+// func (r *meetingResolver) Date() graphql.Time {
+func (r *meetingResolver) Date() string {
+	// fmt.Println("The UTC Time ", r.m.Date.Time.UTC())
 	return r.m.Date
 }
 func (r *meetingResolver) Agenda() *[]*meetingItemResolver {
@@ -326,13 +319,9 @@ func (r *meetingItemResolver) Member() *PersonResolver {
 	}
 	return &PersonResolver{&person}
 }
-<<<<<<< HEAD
-func (r *meetingItemResolver) Duration() *int { return &r.mi.Duration }
-func (r *meetingItemResolver) Title() *string { return &r.mi.Title }
-=======
-func (r *meetingItemResolver) Duration() *float64 { return &r.mi.Duration }
-func (r *meetingItemResolver) Title() *string     { return &r.mi.Title }
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
+
+func (r *meetingItemResolver) Duration() *string { return &r.mi.Duration }
+func (r *meetingItemResolver) Title() *string    { return &r.mi.Title }
 
 //---------- PersonResolver
 

@@ -15,6 +15,7 @@ func setDefaults() {
 }
 
 func init() {
+	setDefaults()
 	if os.Getenv("ENVIRONMENT") == "DEV" {
 		viper.SetConfigName("config")
 		viper.SetConfigType("toml")

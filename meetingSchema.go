@@ -18,16 +18,12 @@ var Schema = `
 
       login(user: String!, password: String!): String
       meetings: [Meeting]
-      meeting(date: Time!): Meeting!
+      meeting(date: String!): Meeting!
     }
 
     type Mutation {
       register(person: PersonInput): String
-<<<<<<< HEAD
-      book(token: String!, date: Time!, roleName: String, title: String): Boolean
-=======
-      book(token: String!, date: Time!, role: MeetingRolesEnum, title: String): Meeting
->>>>>>> 592d827156ab209d15fac4a116eb9e660af99a8d
+      book(token: String!, date: String!, roleName: String, title: String): Boolean
     }
 
     scalar Time
@@ -41,14 +37,14 @@ var Schema = `
     type Meeting {
       id: ID!
       agenda: [MeetingItem]
-      date: Time!
+      date: String!
     }
 
     type MeetingItem {
       id: ID!
       role: MeetingRolesEnum
       member: Person
-      duration: Int
+      duration: String
       title: String
     }
 
