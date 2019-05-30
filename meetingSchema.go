@@ -5,8 +5,6 @@ package main
 // 	"net/http"
 // )
 
-
-
 // Schema describes the data that we ask for
 var Schema = `
     schema {
@@ -18,14 +16,14 @@ var Schema = `
       hello: String!
       wxLogin(code: String!): String!
 
-      login(user: String!, password: String!): ID
+      login(user: String!, password: String!): String
       meetings: [Meeting]
-      meeting(date: Time!): Meeting!
+      meeting(date: String!): Meeting!
     }
 
     type Mutation {
-      register(person: PersonInput): ID
-      book(date: Time!, role: MeetingRolesEnum, title: String): Meeting
+      register(person: PersonInput): String
+      book(token: String!, date: String!, roleName: String, title: String): Boolean
     }
 
     scalar Time
@@ -39,14 +37,14 @@ var Schema = `
     type Meeting {
       id: ID!
       agenda: [MeetingItem]
-      date: Time!
+      date: String!
     }
 
     type MeetingItem {
       id: ID!
       role: MeetingRolesEnum
       member: Person
-      duration: Float
+      duration: String
       title: String
     }
 
@@ -99,4 +97,3 @@ var Schema = `
       SAA
     }
     `
-
