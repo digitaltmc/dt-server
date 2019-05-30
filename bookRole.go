@@ -20,7 +20,7 @@ func (_ *Resolver) Book(args struct {
 	}
 
 	ctx, collection := GetMongo("meetingItems")
-	v, err := collection.InsertOne(
+	_, err := collection.InsertOne(
 		ctx,
 		bson.D{
 			{"date", args.Date},
