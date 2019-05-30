@@ -21,11 +21,7 @@ mutation {
 
 ```
 {
-  login(user:"Wow",password:"world"){
-    id
-    name
-    email
-  }
+  login(user:"Wow",password:"world")
 }
 ```
 You will receive a jwt token here.
@@ -40,7 +36,9 @@ mutation {
 }
 ```
 There will be a unique index constraint on data+roleName, e.g. user can't rebook the same role in the same day.
+<pre>
 digitaltmc.meetingItems
 index: date_1_roleName_1
+</pre>
 The unique index will be manually created in mlab portal.
 
