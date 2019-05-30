@@ -100,7 +100,7 @@ func (_ *Resolver) Register(arg *struct{ Person *PersonInput }) *string {
 		return nil
 	}
 
-	ret, err := createToken(insertRes.InsertedID.(string), arg.Person.Name, arg.Person.Email)
+	ret, err := createToken(insertRes.InsertedID.(primitive.ObjectID).String(), arg.Person.Name, arg.Person.Email)
 	if err != nil {
 		log.Println(err)
 		return nil
