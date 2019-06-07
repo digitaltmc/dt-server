@@ -18,14 +18,13 @@ type Resolver struct{}
 //----------
 
 type Meeting struct {
-	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	Date   string             `bson: "date"`
-	Agenda []*MeetingItem     `bson: "agenda"`
+	Date   string         `bson: "date"`
+	Agenda []*MeetingItem `bson: "agenda"`
 }
 type MeetingItem struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	Role     string             `bson: "role"`
-	Member   primitive.ObjectID `bson: "member"`
+	Member   string             `bson: "member"`
 	Duration string             `bson: "duration"`
 	Title    string             `bson: "title"`
 }
@@ -77,101 +76,32 @@ var currentID primitive.ObjectID
 
 func (_ *Resolver) Hello() string { return "Hello, world!" }
 
-//---------- Mutations
-
-func (_ *Resolver) Register(arg *struct{ Person *PersonInput }) *string {
-	if alreadyExists, err := arg.Person.Exists(); alreadyExists == true || err != nil {
-		log.Printf("User already exists: %v\n", arg.Person.Name)
-		return nil
-	}
-
-	ctx, collection := GetMongo("person")
-	insertRes, err := collection.InsertOne(
-		ctx,
-		bson.D{
-			{"name", arg.Person.Name},
-			{"password", arg.Person.Password},
-			{"email", arg.Person.Email},
-			{"mobile", CheckNilString(arg.Person.Mobile)},
-		},
-	)
-	if err != nil {
-		log.Printf("Insert error: %v\n", err)
-		return nil
-	}
-
-	ret, err := createToken(insertRes.InsertedID.(primitive.ObjectID).String(), arg.Person.Name, arg.Person.Email)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	return &ret
-}
-
-func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
-	wxInfo, err := getwxLoginResult(arg.Code)
-	if wxInfo.Openid != "" {
-		ctx, collection := GetMongo("person")
-		c := collection.FindOne(
-			ctx,
-			bson.D{
-				{"openid", wxInfo.Openid},
-			},
-		)
-		var p Person
-		var err = c.Decode(&p)
-
-		if err != nil {
-			fmt.Println(err)
-			openid := wxInfo.Openid
-			return openid
-		}
-		fmt.Println(p)
-		id := p.Id.Hex()
-		return id
-	} else {
-		e := err.Error()
-		return e
-	}
-}
-
-func (_ *Resolver) Login(arg *struct{ User, Password string }) *string {
-	fmt.Println(arg)
-	ctx, collection := GetMongo("person")
-	c := collection.FindOne(
-		ctx,
-		bson.D{
-			{"email", arg.User},
-			{"password", arg.Password},
-		},
-	)
-
-	var p Person
-	var err = c.Decode(&p)
-
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-
-	log.Println(p)
-
-	ret, err := createToken(p.Id.String(), p.Name, p.Email)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	return &ret
-}
+//----------
 
 func GetMeeting(currentdate string) *Meeting {
-	var meeting Meeting
-	ctx, collection := GetMongo("meeting")
+	var meetingItems []*MeetingItem
+	ctx, collection := GetMongo("meetingItems")
 	filter := bson.D{{"date", currentdate}}
-	err := collection.FindOne(ctx, filter).Decode(&meeting)
+	cur, err := collection.Find(ctx, filter)
 	if err != nil {
-		fmt.Println("!!!!!!!!!!!!", err)
+		fmt.Println("Fail to get meeting: ", err)
 		return nil
+	}
+
+	for cur.Next(ctx) {
+		// create a value into which the single document can be decoded
+		var elem MeetingItem
+		err := cur.Decode(&elem)
+		log.Println(elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+		meetingItems = append(meetingItems, &elem)
+	}
+
+	meeting := Meeting{
+		Date:   currentdate,
+		Agenda: meetingItems,
 	}
 	return &meeting
 }
@@ -180,12 +110,14 @@ func (_ *Resolver) Meeting(args struct {
 }) *meetingResolver {
 	currentdate := args.Date
 	fmt.Println("[current date] ", currentdate)
-	booker := GetMeeting(currentdate)
-	if booker != nil {
-		return &meetingResolver{booker}
+	meeting := GetMeeting(currentdate)
+	if meeting != nil {
+		return &meetingResolver{meeting}
 	}
 	return nil
 }
+
+//----------
 
 func DecodeBookList(cursor *mongo.Cursor) []Meeting {
 	// Largest size is 52 weeks
@@ -282,7 +214,7 @@ type meetingResolver struct {
 	m *Meeting
 }
 
-func (r *meetingResolver) ID() graphql.ID { return graphql.ID(r.m.ID.Hex()) }
+// func (r *meetingResolver) ID() graphql.ID { return graphql.ID(r.m.ID.Hex()) }
 
 // Please convert the time to UTC as the graphql.Time belong to ISO with time.RFC3339
 // func (r *meetingResolver) Date() graphql.Time {
@@ -311,10 +243,11 @@ func (r *meetingItemResolver) Role() *string {
 func (r *meetingItemResolver) Member() *PersonResolver {
 	var person Person
 	ctx, collection := GetMongo("person")
+	// log.Println("member id: ", r.mi.Member.Hex())
 	filter := bson.D{{"_id", r.mi.Member}}
 	err := collection.FindOne(ctx, filter).Decode(&person)
 	if err != nil {
-		fmt.Println(err)
+		log.Println("Fail to find member: ", err)
 		return nil
 	}
 	return &PersonResolver{&person}
@@ -370,32 +303,3 @@ func (r *PersonResolver) Achievements() *[]*meetingItemResolver {
 	ret := makeMeetingItemResolver(r.r.Achievements)
 	return &ret
 }
-
-/*
-1. Data structor: enum/meetingItem & Role
-2. book's paramter
-3. logic to get the agenda from book
-mutation {
-  register(person:{name:"Wow",password:"world",email:"aaa@sap.com",mobile:"888888"})
-}
-{
-  login(user:"Wow",password:"world")
-}
-
-mutation {
-  book(date: "2019-03-11T00:00:00Z", role: Speaker, title: "Hey buddy") {
-    date
-    agenda {
-      role
-      title
-      duration
-      member{
-        name
-        mobile
-        email
-        id
-      }
-    }
-  }
-}
-*/
