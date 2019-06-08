@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -18,15 +17,16 @@ type Resolver struct{}
 //----------
 
 type Meeting struct {
-	Date   string         `bson: "date"`
-	Agenda []*MeetingItem `bson: "agenda"`
+	Date   string         `bson:"date"`
+	Agenda []*MeetingItem `bson:"agenda"`
 }
 type MeetingItem struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Role     string             `bson: "role"`
-	Member   string             `bson: "member"`
-	Duration string             `bson: "duration"`
-	Title    string             `bson: "title"`
+	Date     string             `bson:"date"`
+	RoleName string             `bson:"roleName"`
+	Member   string             `bson:"member"`
+	Title    string             `bson:"title"`
+	Duration string             `bson:"duration"`
 }
 
 type Person struct {
@@ -84,12 +84,11 @@ func GetMeeting(currentdate string) *Meeting {
 	filter := bson.D{{"date", currentdate}}
 	cur, err := collection.Find(ctx, filter)
 	if err != nil {
-		fmt.Println("Fail to get meeting: ", err)
+		log.Println("Fail to get meeting: ", err)
 		return nil
 	}
 
 	for cur.Next(ctx) {
-		// create a value into which the single document can be decoded
 		var elem MeetingItem
 		err := cur.Decode(&elem)
 		log.Println(elem)
@@ -109,7 +108,7 @@ func (_ *Resolver) Meeting(args struct {
 	Date string
 }) *meetingResolver {
 	currentdate := args.Date
-	fmt.Println("[current date] ", currentdate)
+	log.Println("[current date] ", currentdate)
 	meeting := GetMeeting(currentdate)
 	if meeting != nil {
 		return &meetingResolver{meeting}
@@ -127,7 +126,7 @@ func DecodeBookList(cursor *mongo.Cursor) []Meeting {
 		cursor.Decode(&meetings[i])
 		i++
 	}
-	fmt.Println("result length", i)
+	log.Println("result length", i)
 	return meetings[0:i]
 }
 func ContainsKey(doc bson.Raw, key ...string) bool {
@@ -141,14 +140,14 @@ func GetBookers() []Meeting {
 	ctx, collection := GetMongo("meeting")
 	var currentdate = time.Now()
 	limiteddate := currentdate.AddDate(-1, 0, 0)
-	fmt.Println("!!!!!!", limiteddate)
+	log.Println("!!!!!!", limiteddate)
 	//TODO set the limitation of query date
 	// filter := bson.D{{"date", bson.D{{"$lt", currentdate},{"$gt", limiteddate},}},}
 	filter := bson.D{{"date", bson.D{{"$lt", currentdate}}}}
 	cursor, err := collection.Find(ctx, filter)
 
 	if err != nil {
-		fmt.Println("!!!!!!!!!!!!", err)
+		log.Println("!!!!!!!!!!!!", err)
 		return nil
 	}
 	return DecodeBookList(cursor)
@@ -169,47 +168,6 @@ func (_ *Resolver) Meetings() *[]*meetingResolver {
 	return nil
 }
 
-func (_ *Resolver) BookOld(args struct {
-	Token string
-	Date  string
-	Role  *string
-	Title *string
-}) *meetingResolver {
-
-	userId, _, _, validToken := parseToken(args.Token)
-	if !validToken {
-		return nil
-	}
-
-	currentdate := args.Date
-	booker := GetMeeting(currentdate)
-
-	if booker == nil {
-		ctx, collection := GetMongo("meeting")
-		_, error := collection.InsertOne(
-			ctx,
-			bson.D{
-				{"date", currentdate},
-				{"agenda",
-					bson.A{
-						bson.D{
-							{"role", args.Role},
-							{"duration", "7.30"},
-							{"title", args.Title},
-							{"member", userId},
-						},
-					},
-				},
-			},
-		)
-		fmt.Println("Inserted ", error)
-		booker = GetMeeting(currentdate)
-		// ToDo insert new meeting
-	}
-	// fmt.Println(meeting,meeting.id)
-	return &meetingResolver{booker}
-}
-
 type meetingResolver struct {
 	m *Meeting
 }
@@ -219,15 +177,16 @@ type meetingResolver struct {
 // Please convert the time to UTC as the graphql.Time belong to ISO with time.RFC3339
 // func (r *meetingResolver) Date() graphql.Time {
 func (r *meetingResolver) Date() string {
-	// fmt.Println("The UTC Time ", r.m.Date.Time.UTC())
+	// log.Println("The UTC Time ", r.m.Date.Time.UTC())
 	return r.m.Date
 }
 func (r *meetingResolver) Agenda() *[]*meetingItemResolver {
 	l := make([]*meetingItemResolver, len(r.m.Agenda))
 
-	for i, _ := range r.m.Agenda {
-		l[i] = &meetingItemResolver{r.m.Agenda[i]}
-		fmt.Println("Agenda RoleName", r.m.Agenda[i].Role)
+	for i, v := range r.m.Agenda {
+		log.Println(v)
+		l[i] = &meetingItemResolver{v}
+		log.Println("Agenda RoleName:", v.RoleName)
 	}
 	return &l
 }
@@ -237,15 +196,24 @@ type meetingItemResolver struct {
 }
 
 func (r *meetingItemResolver) ID() graphql.ID { return graphql.ID(r.mi.ID.Hex()) }
-func (r *meetingItemResolver) Role() *string {
-	return &r.mi.Role
+func (r *meetingItemResolver) Date() *string {
+	return &r.mi.Date
+}
+func (r *meetingItemResolver) RoleName() *string {
+	return &r.mi.RoleName
 }
 func (r *meetingItemResolver) Member() *PersonResolver {
-	var person Person
 	ctx, collection := GetMongo("person")
 	// log.Println("member id: ", r.mi.Member.Hex())
-	filter := bson.D{{"_id", r.mi.Member}}
-	err := collection.FindOne(ctx, filter).Decode(&person)
+	mid, err := primitive.ObjectIDFromHex(r.mi.Member)
+	if err != nil {
+		log.Fatal("Fail to convert ObjectId:", r.mi.Member)
+	}
+	log.Println("Find id: ", mid)
+	filter := bson.D{{"_id", mid}}
+
+	var person Person
+	err = collection.FindOne(ctx, filter).Decode(&person)
 	if err != nil {
 		log.Println("Fail to find member: ", err)
 		return nil

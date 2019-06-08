@@ -23,7 +23,8 @@ var Schema = `
 
     type Mutation {
       register(person: PersonInput): String
-      book(token: String!, date: String!, role: String, title: String): Boolean
+      book(token: String!, date: String!, roleName: String, title: String): Boolean
+      unbook(token: String!, date: String!, roleName: String): Boolean
       deleteUser(username: String!): String
     }
 
@@ -42,10 +43,11 @@ var Schema = `
 
     type MeetingItem {
       id: ID!
+      date: String
+      roleName: MeetingRolesEnum
       member: Person
-      role: MeetingRolesEnum
-      duration: String
       title: String
+      duration: String
     }
 
     type Person {
