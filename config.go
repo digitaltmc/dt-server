@@ -26,7 +26,7 @@ func init() {
 			log.Println("Config file changed:", e.Name)
 		})
 		if err := viper.ReadInConfig(); err != nil {
-			log.Panicf("Fatal error config file: %s \n", err)
+			log.Printf("Fatal error config file: %s \n", err)
 		}
 	} else {
 		viper.AutomaticEnv()

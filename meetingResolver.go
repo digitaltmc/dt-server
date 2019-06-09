@@ -55,6 +55,7 @@ type PersonInput struct {
 func (p *PersonInput) Exists() (bool, error) {
 	cnt, err := countItems("name", p.Name)
 	if err != nil {
+		log.Println("Found exising name:", p.Name)
 		return false, err
 	}
 	if cnt > 0 {
@@ -63,6 +64,7 @@ func (p *PersonInput) Exists() (bool, error) {
 
 	cnt, err = countItems("email", p.Email)
 	if err != nil {
+		log.Println("Found exising email:", p.Email)
 		return false, err
 	}
 	if cnt > 0 {
@@ -93,7 +95,7 @@ func GetMeeting(currentdate string) *Meeting {
 		err := cur.Decode(&elem)
 		log.Println(elem)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		meetingItems = append(meetingItems, &elem)
 	}
@@ -207,7 +209,8 @@ func (r *meetingItemResolver) Member() *PersonResolver {
 	// log.Println("member id: ", r.mi.Member.Hex())
 	mid, err := primitive.ObjectIDFromHex(r.mi.Member)
 	if err != nil {
-		log.Fatal("Fail to convert ObjectId:", r.mi.Member)
+		log.Println("Fail to convert ObjectId:", r.mi.Member)
+		return nil
 	}
 	log.Println("Find id: ", mid)
 	filter := bson.D{{"_id", mid}}
