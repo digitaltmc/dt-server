@@ -9,7 +9,7 @@ import (
 
 func (_ *Resolver) Register(arg *struct{ Person *PersonInput }) *string {
 	if alreadyExists, err := arg.Person.Exists(); alreadyExists == true || err != nil {
-		log.Printf("User already exists: %v\n", arg.Person.Name)
+		log.Printf("User already exists: %v. Reason: %v.\n", arg.Person.Name, err)
 		return nil
 	}
 

@@ -46,7 +46,8 @@ func parseToken(tokenString string) (id string, name string, email string, valid
 		return hmacSampleSecret, nil
 	})
 	if err != nil {
-		log.Fatal("Fail to parseToken:", err)
+		log.Println("Fail to parseToken:", err)
+		return "", "", "", false
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
