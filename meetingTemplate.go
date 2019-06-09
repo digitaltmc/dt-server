@@ -1,7 +1,7 @@
 package main
 
 type MeetingRole struct {
-	Role        string
+	RoleName    string
 	DisplayName string
 }
 
@@ -41,26 +41,26 @@ func init() {
 	}
 
 	AgendaTemplate = []MeetingItem{
-		MeetingItem{Role: "SAA", Duration: "2"},
-		MeetingItem{Role: "President", Duration: "1"},
-		MeetingItem{Role: "TMD", Duration: "1"},
-		MeetingItem{Role: "GE", Duration: "3"},
-		MeetingItem{Role: "AhCounter", Duration: "1"},
-		MeetingItem{Role: "Timer", Duration: "1"},
-		MeetingItem{Role: "Grammarian", Duration: "2"},
-		MeetingItem{Role: "TTM", Duration: "15"},
-		MeetingItem{Role: "TTIE", Duration: "5"},
-		MeetingItem{Role: "Speaker", Duration: "7"},
-		MeetingItem{Role: "Speaker", Duration: "7"},
-		MeetingItem{Role: "Speaker", Duration: "7"},
-		MeetingItem{Role: "IE", Duration: "3"},
-		MeetingItem{Role: "IE", Duration: "3"},
-		MeetingItem{Role: "IE", Duration: "3"},
-		MeetingItem{Role: "AhCounter", Duration: "1"},
-		MeetingItem{Role: "Timer", Duration: "1"},
-		MeetingItem{Role: "Grammarian", Duration: "2"},
-		MeetingItem{Role: "GE", Duration: "5"},
-		MeetingItem{Role: "President", Duration: "2"},
+		MeetingItem{RoleName: "SAA", Duration: "2"},
+		MeetingItem{RoleName: "President", Duration: "1"},
+		MeetingItem{RoleName: "TMD", Duration: "1"},
+		MeetingItem{RoleName: "GE", Duration: "3"},
+		MeetingItem{RoleName: "AhCounter", Duration: "1"},
+		MeetingItem{RoleName: "Timer", Duration: "1"},
+		MeetingItem{RoleName: "Grammarian", Duration: "2"},
+		MeetingItem{RoleName: "TTM", Duration: "15"},
+		MeetingItem{RoleName: "TTIE", Duration: "5"},
+		MeetingItem{RoleName: "Speaker", Duration: "7"},
+		MeetingItem{RoleName: "Speaker", Duration: "7"},
+		MeetingItem{RoleName: "Speaker", Duration: "7"},
+		MeetingItem{RoleName: "IE", Duration: "3"},
+		MeetingItem{RoleName: "IE", Duration: "3"},
+		MeetingItem{RoleName: "IE", Duration: "3"},
+		MeetingItem{RoleName: "AhCounter", Duration: "1"},
+		MeetingItem{RoleName: "Timer", Duration: "1"},
+		MeetingItem{RoleName: "Grammarian", Duration: "2"},
+		MeetingItem{RoleName: "GE", Duration: "5"},
+		MeetingItem{RoleName: "President", Duration: "2"},
 	}
 }
 

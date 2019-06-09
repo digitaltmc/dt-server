@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -51,11 +50,11 @@ func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 		var err = c.Decode(&p)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			openid := wxInfo.Openid
 			return openid
 		}
-		fmt.Println(p)
+		log.Println(p)
 		id := p.Id.Hex()
 		return id
 	} else {
@@ -65,7 +64,7 @@ func (_ *Resolver) WxLogin(arg *struct{ Code string }) string {
 }
 
 func (_ *Resolver) Login(arg *struct{ User, Password string }) *string {
-	fmt.Println(arg)
+	log.Println("Login: ", arg)
 	ctx, collection := GetMongo("person")
 	c := collection.FindOne(
 		ctx,
@@ -79,7 +78,7 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *string {
 	var err = c.Decode(&p)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return nil
 	}
 
@@ -95,7 +94,7 @@ func (_ *Resolver) Login(arg *struct{ User, Password string }) *string {
 }
 
 func (_ *Resolver) DeleteUser(arg *struct{ Username string }) *string {
-	fmt.Println(arg)
+	log.Println("DeleteUser:", arg)
 	ctx, collection := GetMongo("person")
 	_, err := collection.DeleteOne(
 		ctx,
