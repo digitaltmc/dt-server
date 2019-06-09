@@ -78,6 +78,7 @@ mutation {
 }
 `
 
+// You will receive a jwt token here.
 const loginUser = gql`
 {
   login(user:"owen",password:"pwd")
@@ -95,6 +96,17 @@ mutation {
 }
 `
 
+/*
+There will be a unique index constraint on data+roleName, e.g. user can't rebook the same role in the same day.
+<pre>
+digitaltmc.meetingItems
+index: date_1_roleName_1
+</pre>
+The unique index will be manually created in mlab portal.
+See scripts/mongoIndex.sh for more info on the unique index.
+
+Please set the date value as the example format like "2019-03-11T00:00:00Z".
+ */
 const book1 = () => gql`
 mutation {
   book(token: "${token}", date: "2011-01-01", roleName: "ie", title: "ieTitle1")
